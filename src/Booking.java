@@ -44,7 +44,16 @@ public class Booking {
 
     @Override
     public String toString(){
-        return vehicle.getPlate() + ":" + vehicle.getMake() + vehicle.getDate() + " [mileage:" + vehicle.getMileage() + "]" + " [beginning " + begin + " ending " + end + ":" + employee + "]";
+        Date obtained = vehicle.getDate();
+        String obtainedStr = obtained.getMonth() + "/" + obtained.getDay() + "/" + obtained.getYear();
+
+        String beginStr = begin.getMonth() + "/" + begin.getDay() + "/" + begin.getYear();
+        String endStr   = end.getMonth()   + "/" + end.getDay()   + "/" + end.getYear();
+
+        return vehicle.getPlate() + ":" + vehicle.getMake().name() + ":" + obtainedStr
+                + " [mileage:" + vehicle.getMileage() + "]"
+                + " [beginning " + beginStr + " ending " + endStr + ":" + employee.name() + "]";
+
     }
 
 

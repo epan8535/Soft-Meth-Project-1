@@ -271,26 +271,23 @@ public class Frontend {
 
 
     private void cancelBooking(Scanner scanner) {
-        for(int i = 0; i < 3; i++){
-            if(!scanner.hasNext()){
-                System.out.println("invalid command!");
-                return;
-            }
+        for (int need = 0; need < 3; need++) {
+            if (!scanner.hasNext()) { System.out.println("invalid command!"); return; }
         }
 
         String beginToken = scanner.next();
         Scanner beginScanner = new Scanner(beginToken).useDelimiter("/");
         int beginMonth = beginScanner.nextInt();
-        int beginDay = beginScanner.nextInt();
-        int beginYear = beginScanner.nextInt();
+        int beginDay   = beginScanner.nextInt();
+        int beginYear  = beginScanner.nextInt();
         beginScanner.close();
         Date beginDate = new Date(beginYear, beginMonth, beginDay);
 
         String endToken = scanner.next();
         Scanner endScanner = new Scanner(endToken).useDelimiter("/");
         int endMonth = endScanner.nextInt();
-        int endDay = endScanner.nextInt();
-        int endYear = endScanner.nextInt();
+        int endDay   = endScanner.nextInt();
+        int endYear  = endScanner.nextInt();
         endScanner.close();
         Date endDate = new Date(endYear, endMonth, endDay);
 
@@ -298,13 +295,13 @@ public class Frontend {
 
         Booking targetBooking = null;
         int targetIndex = -1;
-        for (int scanIndex = 0; scanIndex < bookingCount; scanIndex++) {
-            Booking existing = bookingIndex[scanIndex];
-            if (existing.getVehicle().getPlate().equals(plate)
-                    && existing.getBegin().equals(beginDate)
-                    && existing.getEnd().equals(endDate)) {
-                targetBooking = existing;
-                targetIndex = scanIndex;
+        for (int i = 0; i < bookingCount; i++) {
+            Booking b = bookingIndex[i];
+            if (b.getVehicle().getPlate().equals(plate)
+                    && b.getBegin().compareTo(beginDate) == 0
+                    && b.getEnd().compareTo(endDate) == 0) {
+                targetBooking = b;
+                targetIndex = i;
                 break;
             }
         }
@@ -322,32 +319,32 @@ public class Frontend {
         System.out.println(plate + ":" + beginToken + " ~ " + endToken + " has been canceled.");
     }
 
+
     private void returnVehicle(Scanner scanner) {
-        for(int i = 0; i < 3; i++){
-            if(!scanner.hasNext()){
-                System.out.println("invalid command!");
-                return;
-            }
+        for (int need = 0; need < 3; need++) {
+            if (!scanner.hasNext()) { System.out.println("invalid command!"); return; }
         }
 
         String endToken = scanner.next();
         Scanner endScanner = new Scanner(endToken).useDelimiter("/");
         int endMonth = endScanner.nextInt();
-        int endDay = endScanner.nextInt();
-        int endYear = endScanner.nextInt();
+        int endDay   = endScanner.nextInt();
+        int endYear  = endScanner.nextInt();
         endScanner.close();
         Date endDate = new Date(endYear, endMonth, endDay);
 
         String plate = scanner.next();
-        int newOdometer = Integer.parseInt(scanner.next());
+        String odometerToken = scanner.next();
+        int newOdometer = Integer.parseInt(odometerToken);
 
+        // find booking by (plate, end date)
         Booking targetBooking = null;
         int targetIndex = -1;
-        for (int scanIndex = 0; scanIndex < bookingCount; scanIndex++) {
-            Booking existing = bookingIndex[scanIndex];
-            if (existing.getVehicle().getPlate().equals(plate) && existing.getEnd().equals(endDate)) {
-                targetBooking = existing;
-                targetIndex = scanIndex;
+        for (int i = 0; i < bookingCount; i++) {
+            Booking b = bookingIndex[i];
+            if (b.getVehicle().getPlate().equals(plate) && b.getEnd().compareTo(endDate) == 0) {
+                targetBooking = b;
+                targetIndex = i;
                 break;
             }
         }
@@ -356,35 +353,49 @@ public class Frontend {
             return;
         }
 
+        // must be the earliest ending booking among all current bookings
         Booking earliestEnding = null;
-        for (int scanIndex = 0; scanIndex < bookingCount; scanIndex++) {
-            if (earliestEnding == null || bookingIndex[scanIndex].getEnd().compareTo(earliestEnding.getEnd()) < 0) {
-                earliestEnding = bookingIndex[scanIndex];
+        for (int i = 0; i < bookingCount; i++) {
+            if (earliestEnding == null || bookingIndex[i].getEnd().compareTo(earliestEnding.getEnd()) < 0) {
+                earliestEnding = bookingIndex[i];
             }
         }
-        if (earliestEnding != null && !earliestEnding.getEnd().equals(endDate)) {
+        if (earliestEnding != null && earliestEnding.getEnd().compareTo(endDate) != 0) {
             System.out.println(plate + " booked with ending date " + endToken + " - returning not in order of ending date.");
             return;
         }
 
         int originalOdometer = targetBooking.getVehicle().getMileage();
-        if (newOdometer <= 0 || newOdometer <= originalOdometer) {
+        if (newOdometer <= 0) {
+            System.out.println(newOdometer + " - invalid mileage.");
+            return;
+        }
+        if (newOdometer <= originalOdometer) {
             System.out.println("Invalid mileage - current mileage: " + originalOdometer + " entered mileage: " + newOdometer);
             return;
         }
 
-        reservations.remove(targetBooking);
+        // finalize trip
+        Trip completedTrip = new Trip(targetBooking, originalOdometer, newOdometer);
+        trips.add(completedTrip);
+        targetBooking.getVehicle().setMileage(newOdometer); // ensure Vehicle has setMileage(int)
 
+        // remove booking from active sets
+        reservations.remove(targetBooking);
         bookingIndex[targetIndex] = bookingIndex[bookingCount - 1];
         bookingIndex[bookingCount - 1] = null;
         bookingCount--;
 
-        Trip completedTrip = new Trip(targetBooking, originalOdometer, newOdometer);
-        trips.add(completedTrip);
-        targetBooking.getVehicle().setMileage(newOdometer);
+        String beginStr = targetBooking.getBegin().getMonth() + "/" + targetBooking.getBegin().getDay() + "/" + targetBooking.getBegin().getYear();
+        String endStr   = targetBooking.getEnd().getMonth()   + "/" + targetBooking.getEnd().getDay()   + "/" + targetBooking.getEnd().getYear();
+        int used = newOdometer - originalOdometer;
 
-        System.out.println("Vehicle returned. " + completedTrip);
+        System.out.println("Trip completed: " + plate + " " + beginStr + " ~ " + endStr
+                + " original mileage: " + originalOdometer
+                + " current mileage: " + newOdometer
+                + " mileage used: " + used);
     }
+
 
 
     private void printCommand(String subcommand) {
@@ -408,6 +419,7 @@ public class Frontend {
 
     public void run() {
         System.out.println("Vehicle Management System is running.");
+        System.out.println();
         Scanner stdinScanner = new Scanner(System.in);
         while (true) {
             if (!stdinScanner.hasNextLine()) break;
@@ -421,7 +433,8 @@ public class Frontend {
             String command = lineScanner.next();
 
             if (command.equals("Q")) {
-                System.out.println("Vehicle Management System is terminated.");
+                System.out.println();
+                System.out.println("Vehicle Management System is terminated. ");
                 lineScanner.close();
                 break;
             }

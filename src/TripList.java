@@ -28,6 +28,8 @@ public class TripList {
             return;
         }
 
+        System.out.println("*List of completed trips ordered by ending date.");
+
         Node head = last.next;
 
         // 1) count nodes without do-while
@@ -66,6 +68,9 @@ public class TripList {
 
         // 4) print
         for (int i = 0; i < count; i++) System.out.println(a[i]);
+        System.out.println("*end of list.");
+        System.out.println();
+
     }
 
 }

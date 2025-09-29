@@ -104,6 +104,7 @@ public class Fleet {
             System.out.println(fleet[i].toString());
         }
         System.out.println("*end of list.");
+        System.out.println();
 
     }
 
