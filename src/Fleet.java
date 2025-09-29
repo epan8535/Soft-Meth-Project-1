@@ -76,7 +76,7 @@ public class Fleet {
     public void printByMake(){ //ordered by make, then date obtained
 
         if(size == 0){
-            System.out.println("Fleet is empty");
+            System.out.println("There is no vehicle in the fleet.");
             return;
         }
 
@@ -99,11 +99,11 @@ public class Fleet {
 
         }
 
-        System.out.println("List of vehicles sorted by make, obtained date");
+        System.out.println("*List of vehicles in the fleet, ordered by make and date obtained.");
         for(int i = 0; i<size;i++){
             System.out.println(fleet[i].toString());
         }
-        System.out.println("end of the list");
+        System.out.println("*end of list.");
 
     }
 

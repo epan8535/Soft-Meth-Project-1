@@ -36,6 +36,6 @@ public class Trip {
 
     @Override
     public String toString(){
-        return booking.getVehicle().getPlate() + " " + booking.getBegin() + " ~ " + booking.getEnd() + " original mileage: " + beginMileage + " current mileage: " + endMileage + " mileage used: " + endMileage - beginMileage;
+        return booking.getVehicle().getPlate() + " " + booking.getBegin() + " ~ " + booking.getEnd() + " original mileage: " + beginMileage + " current mileage: " + endMileage + " mileage used: " + (endMileage - beginMileage);
     }
 }

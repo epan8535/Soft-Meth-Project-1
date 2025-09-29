@@ -14,6 +14,13 @@ public class Frontend {
     private int bookingCount = 0;
 
     private void addVehicle(Scanner scanner) {
+        for(int i = 0; i < 4; i++){ //make sure scanner has 4 tokens
+            if(!scanner.hasNext()){
+                System.out.println("invalid command!");
+                return;
+            }
+        }
+
         String plate = scanner.next();
         String temp = scanner.next();
         Scanner obtainedScanner = new Scanner(temp).useDelimiter("/");
@@ -26,13 +33,13 @@ public class Frontend {
         int curOdomoter = Integer.parseInt(scanner.next());
 
         if(!obtainedDate.isValid()){
-            System.out.println("invalid calendar date.");
+            System.out.println(temp + " - invalid calendar date.");
             return;
         }
         Calendar calendarToday = Calendar.getInstance();
         Date today = new Date(calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH));
         if(obtainedDate.compareTo(today) >= 0) {
-            System.out.println("is today or a future date.");
+            System.out.println(temp + " - is today or a future date.");
             return;
         }
 
@@ -44,11 +51,11 @@ public class Frontend {
             }
         }
         if(make == null) {
-            System.out.println("invalid make.");
+            System.out.println(obtainedMake + " - invalid make.");
             return;
         }
         if(curOdomoter <= 0) {
-            System.out.println("invalid mileage.");
+            System.out.println(curOdomoter + " - invalid mileage.");
             return;
         }
         Vehicle vehicle = new Vehicle(plate,obtainedDate,make,curOdomoter);
@@ -66,55 +73,88 @@ public class Frontend {
             vehicleIndex = newVehicleArray;
         }
         vehicleIndex[vehicleCount++] = vehicle;
-        System.out.println(vehicle + " added to the fleet.");
+        System.out.println(vehicle + " has been added to the fleet.");
     }
 
     private void deleteVehicle(Scanner scanner) {
-        String plate = scanner.next();
-        Vehicle vehicleSearch = new Vehicle(plate, null, null, 1);
-        for(int i = 0; i < bookingCount; i++){
-            if(bookingIndex[i].getVehicle().equals(vehicleSearch)){
-                System.out.println(plate + " has existing bookings; cannot be removed.");
-                return;
-            }
-        }
-        fleet.remove(vehicleSearch);
 
-        for(int i = 0; i < vehicleCount; i++){
-            if(vehicleIndex[i].equals(vehicleSearch)){
-                vehicleIndex[i] = vehicleIndex[vehicleCount - 1];
-                vehicleIndex[vehicleCount - 1] = null;
-                vehicleCount--;
+        if(!scanner.hasNext()){
+            System.out.println("invalid command!");
+            return;
+        }
+
+        String plate = scanner.next();
+        int vehiclePosition = -1;
+        for (int vehicleIndexPos = 0; vehicleIndexPos < vehicleCount; vehicleIndexPos++) {
+            if (vehicleIndex[vehicleIndexPos].getPlate().equals(plate)) {
+                vehiclePosition = vehicleIndexPos;
                 break;
             }
         }
-        System.out.println(plate + " removed from the fleet.");
+        if (vehiclePosition == -1) {
+            System.out.println(plate + " is not in the fleet.");
+            return;
+        }
+        Vehicle vehicleToRemove = vehicleIndex[vehiclePosition];
+
+        // 2) block removal if there are active bookings for this vehicle
+        for (int bookingIndexPos = 0; bookingIndexPos < bookingCount; bookingIndexPos++) {
+            if (bookingIndex[bookingIndexPos].getVehicle().equals(vehicleToRemove)) {
+                System.out.println(plate + " - has existing bookings; cannot be removed.");
+                return;
+            }
+        }
+
+        // 3) remove from authoritative fleet
+        fleet.remove(vehicleToRemove);
+
+        // 4) remove from mirror index (swap-with-last)
+        vehicleIndex[vehiclePosition] = vehicleIndex[vehicleCount - 1];
+        vehicleIndex[vehicleCount - 1] = null;
+        vehicleCount--;
+
+        // 5) success message must print the full vehicle string
+        System.out.println(vehicleToRemove + " has been removed from the fleet.");
     }
 
     private void bookVehicle(Scanner scanner) {
+
+        // needs 4 tokens: begin, end, plate, employee
+        for (int need = 0; need < 4; need++) {
+            if (!scanner.hasNext()) { System.out.println("invalid command!"); return; }
+        }
+
+        // raw tokens (keep for messages)
         String beginToken = scanner.next();
-        Scanner beginScanner = new Scanner(beginToken).useDelimiter("/");
-        int beginMonth = beginScanner.nextInt();
-        int beginDay = beginScanner.nextInt();
-        int beginYear = beginScanner.nextInt();
-        beginScanner.close();
-        Date beginDate = new Date(beginYear, beginMonth, beginDay);
-
         String endToken = scanner.next();
-        Scanner endScanner = new Scanner(endToken).useDelimiter("/");
-        int endMonth = endScanner.nextInt();
-        int endDay = endScanner.nextInt();
-        int endYear = endScanner.nextInt();
-        endScanner.close();
-        Date endDate = new Date(endYear, endMonth, endDay);
-
         String plate = scanner.next();
         String employeeToken = scanner.next();
 
+        // parse dates
+        Scanner beginScanner = new Scanner(beginToken).useDelimiter("/");
+        int beginMonth = beginScanner.nextInt();
+        int beginDay   = beginScanner.nextInt();
+        int beginYear  = beginScanner.nextInt();
+        beginScanner.close();
+        Date beginDate = new Date(beginYear, beginMonth, beginDay);
+
+        Scanner endScanner = new Scanner(endToken).useDelimiter("/");
+        int endMonth = endScanner.nextInt();
+        int endDay   = endScanner.nextInt();
+        int endYear  = endScanner.nextInt();
+        endScanner.close();
+        Date endDate = new Date(endYear, endMonth, endDay);
+
+        // ---- validations (exact phrasing) ----
         if (!beginDate.isValid()) {
-            System.out.println("invalid calendar date.");
+            System.out.println(beginToken + " - beginning date is not a valid calendar date.");
             return;
         }
+        if (!endDate.isValid()) {
+            System.out.println(endToken + " - ending date is not a valid calendar date.");
+            return;
+        }
+
         Calendar calendarToday = Calendar.getInstance();
         Date today = new Date(
                 calendarToday.get(Calendar.YEAR),
@@ -128,14 +168,21 @@ public class Frontend {
                 calendarLimit.get(Calendar.MONTH) + 1,
                 calendarLimit.get(Calendar.DAY_OF_MONTH)
         );
-        if (beginDate.compareTo(today) < 0 || beginDate.compareTo(limitDate) > 0) {
-            System.out.println("invalid date range.");
+
+        if (beginDate.compareTo(today) < 0) {
+            System.out.println(beginToken + " - beginning date is not today or a future date.");
             return;
         }
-        if (!endDate.isValid() || endDate.compareTo(beginDate) < 0) {
-            System.out.println("invalid date range.");
+        if (beginDate.compareTo(limitDate) > 0) {
+            System.out.println(beginToken + " - beginning date beyond 3 months.");
             return;
         }
+        if (endDate.compareTo(beginDate) < 0) {
+            System.out.println(endToken + " - ending date must be equal or after the beginning date " + beginToken);
+            return;
+        }
+
+        // duration: reject >= 7 days (because 10/26 ~ 11/2 must fail per spec)
         Calendar beginCal = Calendar.getInstance();
         beginCal.set(beginYear, beginMonth - 1, beginDay, 0, 0, 0);
         beginCal.set(Calendar.MILLISECOND, 0);
@@ -144,72 +191,70 @@ public class Frontend {
         endCal.set(Calendar.MILLISECOND, 0);
         long millisDiff = endCal.getTimeInMillis() - beginCal.getTimeInMillis();
         int daysBetween = (int) (millisDiff / (24L * 60L * 60L * 1000L));
-        if (daysBetween > 7) {
-            System.out.println("invalid date range.");
+        if (daysBetween >= 7) {
+            System.out.println(beginToken + " ~ " + endToken + " - duration more than a week.");
             return;
         }
 
+        // find vehicle by plate (mirror index)
         Vehicle vehicle = null;
-        Vehicle vehicleProbe = new Vehicle(plate, null, null, 1);
-        for (int vehicleIndexPos = 0; vehicleIndexPos < vehicleCount; vehicleIndexPos++) {
-            if (vehicleIndex[vehicleIndexPos].equals(vehicleProbe)) {
-                vehicle = vehicleIndex[vehicleIndexPos];
-                break;
-            }
+        for (int pos = 0; pos < vehicleCount; pos++) {
+            if (vehicleIndex[pos].getPlate().equals(plate)) { vehicle = vehicleIndex[pos]; break; }
         }
         if (vehicle == null) {
-            System.out.println("vehicle not in the fleet.");
+            System.out.println(plate + " is not in the fleet.");
             return;
         }
 
-        for (int bookingScanIndex = 0; bookingScanIndex < bookingCount; bookingScanIndex++) {
-            Booking existing = bookingIndex[bookingScanIndex];
+        // vehicle availability overlap
+        for (int i = 0; i < bookingCount; i++) {
+            Booking existing = bookingIndex[i];
             if (existing.getVehicle().equals(vehicle)) {
                 Date existingBegin = existing.getBegin();
-                Date existingEnd = existing.getEnd();
+                Date existingEnd   = existing.getEnd();
                 if (beginDate.compareTo(existingEnd) <= 0 && existingBegin.compareTo(endDate) <= 0) {
-                    System.out.println("vehicle not available for the given dates.");
+                    System.out.println(plate + " - booking with " + beginToken + " ~ " + endToken + " not available.");
                     return;
                 }
             }
         }
 
+        // employee parse (no try/catch)
         Employee employee = null;
-        for (Employee candidateEmployee : Employee.values()) {
-            if (candidateEmployee.name().equalsIgnoreCase(employeeToken)) {
-                employee = candidateEmployee;
-                break;
-            }
+        for (Employee candidate : Employee.values()) {
+            if (candidate.name().equalsIgnoreCase(employeeToken)) { employee = candidate; break; }
         }
         if (employee == null) {
-            System.out.println("employee not eligible.");
+            System.out.println(employeeToken + " - not an eligible employee to book.");
             return;
         }
 
-        for (int bookingScanIndex = 0; bookingScanIndex < bookingCount; bookingScanIndex++) {
-            Booking existing = bookingIndex[bookingScanIndex];
+        // employee conflict overlap
+        for (int i = 0; i < bookingCount; i++) {
+            Booking existing = bookingIndex[i];
             if (existing.getEmployee() == employee) {
                 Date existingBegin = existing.getBegin();
-                Date existingEnd = existing.getEnd();
+                Date existingEnd   = existing.getEnd();
                 if (beginDate.compareTo(existingEnd) <= 0 && existingBegin.compareTo(endDate) <= 0) {
-                    System.out.println("employee has a conflicting booking.");
+                    System.out.println(employee.name() + " - has an existing booking conflicting with the beginning date " + beginToken);
                     return;
                 }
             }
         }
 
+        // create booking
         Booking booking = new Booking(beginDate, endDate, employee, vehicle);
         reservations.add(booking);
 
+        // grow mirror if needed
         if (bookingCount == bookingIndex.length) {
             Booking[] newBookingArray = new Booking[bookingIndex.length + INDEX_GROWTH];
-            for (int i = 0; i < bookingCount; i++) {
-                newBookingArray[i] = bookingIndex[i];
-            }
+            for (int i = 0; i < bookingCount; i++) newBookingArray[i] = bookingIndex[i];
             bookingIndex = newBookingArray;
         }
         bookingIndex[bookingCount++] = booking;
 
+        // success print (exact format)
         Date obtained = vehicle.getDate();
         String obtainedDateText = obtained.getMonth() + "/" + obtained.getDay() + "/" + obtained.getYear();
         int currentMileage = vehicle.getMileage();
@@ -224,7 +269,15 @@ public class Frontend {
         );
     }
 
+
     private void cancelBooking(Scanner scanner) {
+        for(int i = 0; i < 3; i++){
+            if(!scanner.hasNext()){
+                System.out.println("invalid command!");
+                return;
+            }
+        }
+
         String beginToken = scanner.next();
         Scanner beginScanner = new Scanner(beginToken).useDelimiter("/");
         int beginMonth = beginScanner.nextInt();
@@ -256,7 +309,7 @@ public class Frontend {
             }
         }
         if (targetBooking == null) {
-            System.out.println("booking not found.");
+            System.out.println(plate + ":" + beginToken + " ~ " + endToken + " - cannot find the booking.");
             return;
         }
 
@@ -266,10 +319,17 @@ public class Frontend {
         bookingIndex[bookingCount - 1] = null;
         bookingCount--;
 
-        System.out.println("booking canceled: " + targetBooking);
+        System.out.println(plate + ":" + beginToken + " ~ " + endToken + " has been canceled.");
     }
 
     private void returnVehicle(Scanner scanner) {
+        for(int i = 0; i < 3; i++){
+            if(!scanner.hasNext()){
+                System.out.println("invalid command!");
+                return;
+            }
+        }
+
         String endToken = scanner.next();
         Scanner endScanner = new Scanner(endToken).useDelimiter("/");
         int endMonth = endScanner.nextInt();
@@ -292,7 +352,7 @@ public class Frontend {
             }
         }
         if (targetBooking == null) {
-            System.out.println("no such booking found for return.");
+            System.out.println(plate + " booked with ending date " + endToken + " - cannot find the booking.");
             return;
         }
 
@@ -303,13 +363,13 @@ public class Frontend {
             }
         }
         if (earliestEnding != null && !earliestEnding.getEnd().equals(endDate)) {
-            System.out.println("cannot return; not the earliest ending booking.");
+            System.out.println(plate + " booked with ending date " + endToken + " - returning not in order of ending date.");
             return;
         }
 
         int originalOdometer = targetBooking.getVehicle().getMileage();
         if (newOdometer <= 0 || newOdometer <= originalOdometer) {
-            System.out.println("invalid mileage.");
+            System.out.println("Invalid mileage - current mileage: " + originalOdometer + " entered mileage: " + newOdometer);
             return;
         }
 
@@ -359,6 +419,7 @@ public class Frontend {
             if (!lineScanner.hasNext()) { lineScanner.close(); continue; }
 
             String command = lineScanner.next();
+
             if (command.equals("Q")) {
                 System.out.println("Vehicle Management System is terminated.");
                 lineScanner.close();
@@ -375,10 +436,10 @@ public class Frontend {
                 cancelBooking(lineScanner);
             } else if (command.equals("R")) {
                 returnVehicle(lineScanner);
-            } else if (command.startsWith("P")) {
+            } else if (command.equals("PF") || command.equals("PR") || command.equals("PD") || command.equals("PT")) {
                 printCommand(command);
             } else {
-                System.out.println("invalid command.");
+                System.out.println(command + " - invalid command!");
             }
 
             lineScanner.close();

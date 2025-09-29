@@ -49,51 +49,61 @@ public class Reservation {
         }
     }
 
-    public void printByVehicle(){
-        for (int i = 1; i < size; i++){
+    public void printByVehicle() {
+        if (size == 0) {
+            System.out.println("There is no booking record.");
+            return;
+        }
+
+        // Insertion sort by plate, then beginning date
+        for (int i = 1; i < size; i++) {
             Booking key = bookings[i];
             int j = i - 1;
             while (j >= 0) {
                 String plateKey = key.getVehicle().getPlate();
-                String plateJ = bookings[j].getVehicle().getPlate();
-                Date keyBegin = key.getBegin();
-                Date jBegin = bookings[j].getBegin();
-                boolean moveLeft = (plateKey.compareTo(plateJ) < 0) || (plateKey.compareTo(plateJ) == 0 && keyBegin.compareTo(jBegin) < 0);
-                if(!moveLeft) {
-                    break;
-                }
+                String plateJ   = bookings[j].getVehicle().getPlate();
+                Date   keyBegin = key.getBegin();
+                Date   jBegin   = bookings[j].getBegin();
+
+                boolean moveLeft =
+                        (plateKey.compareTo(plateJ) < 0) ||
+                                (plateKey.compareTo(plateJ) == 0 && keyBegin.compareTo(jBegin) < 0);
+
+                if (!moveLeft) break;
                 bookings[j + 1] = bookings[j];
                 j--;
             }
             bookings[j + 1] = key;
         }
-        for(int k = 0; k < size; k++){
-            System.out.println(bookings[k]);
-        }
-    } //ordered by plate then beginning date
-
+        for (int k = 0; k < size; k++) System.out.println(bookings[k]);
+    } // ordered by plate then beginning date
 
     public void printByDept() {
-        for (int i = 1; i < size; i++){
+        if (size == 0) {
+            System.out.println("There is no booking record.");
+            return;
+        }
+
+        // Insertion sort by department, then employee name
+        for (int i = 1; i < size; i++) {
             Booking key = bookings[i];
             int j = i - 1;
             while (j >= 0) {
                 Department deptKey = key.getEmployee().getDept();
-                Department deptJ = bookings[j].getEmployee().getDept();
-                String empKey = key.getEmployee().name();
-                String empJ = bookings[j].getEmployee().name();
+                Department deptJ   = bookings[j].getEmployee().getDept();
+                String     empKey  = key.getEmployee().name();
+                String     empJ    = bookings[j].getEmployee().name();
+
                 int cmpDept = deptKey.name().compareTo(deptJ.name());
                 boolean moveLeft = (cmpDept < 0) || (cmpDept == 0 && empKey.compareTo(empJ) < 0);
-                if(!moveLeft) {
-                    break;
-                }
+
+                if (!moveLeft) break;
                 bookings[j + 1] = bookings[j];
                 j--;
             }
             bookings[j + 1] = key;
         }
-        for(int k = 0; k < size; k++){
-            System.out.println(bookings[k]);
-        }
-    } //ordered by department then by employee
+        for (int k = 0; k < size; k++) System.out.println(bookings[k]);
+    } // ordered by department then by employee
+
 }

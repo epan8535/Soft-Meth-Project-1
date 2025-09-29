@@ -33,13 +33,16 @@ public class Date implements Comparable<Date>{
             if(year%CENTENNIAL==0){
                if(year%QUARTERCENTENNIAL==0){
                    return true;
+               } else {
+                   return false;
                }
+            } else {
+                return true;
             }
 
+        } else {
+            return false;
         }
-
-        return false;
-
     }
 
     public boolean has30Days(int month){
@@ -76,24 +79,24 @@ public class Date implements Comparable<Date>{
         //Check if Day is Valid 0<x< 30 or 31 and 28 or 29 for February
 
         if(has30Days(month)){
-            if(day<0 || day>30){
+            if(day<=0 || day>30){
                 return false;
             }
         }
 
         else if(has31Days(month)){
-            if(day<0 ||day>31){
+            if(day<=0 ||day>31){
                 return false;
             }
         }
         else if(isFebruary(month)){
             if(isLeap(year)){
-                if(day<0 || day>29){
+                if(day<=0 || day>29){
                     return false;
                 }
             }
             else{
-                if(day<0 || day>28){
+                if(day<=0 || day>28){
                     return false;
                 }
             }
@@ -104,7 +107,7 @@ public class Date implements Comparable<Date>{
 
 
         //Check if Year is Valid
-        if(year<1900 || year>2025){
+        if(year<1900){
             return false;
         }
 

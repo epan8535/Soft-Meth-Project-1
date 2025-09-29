@@ -23,42 +23,49 @@ public class TripList {
     }
 
     public void print() {
-        if(last == null){
+        if (last == null) {
+            System.out.println("There is no archived trips.");
             return;
         }
+
         Node head = last.next;
+
+        // 1) count nodes without do-while
         int count = 0;
         Node p = head;
         while (true) {
             count++;
             p = p.next;
-            if (p == head){
-                break;
-            }
+            if (p == head) break;
         }
+
+        // 2) copy to array
         Trip[] a = new Trip[count];
         p = head;
-        for (int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             a[i] = p.data;
             p = p.next;
         }
-        for(int i = 1; i < count; i++){
+
+        // 3) insertion sort by ending date
+        for (int i = 1; i < count; i++) {
             Trip key = a[i];
             int j = i - 1;
-            while(j >= 0){
+            while (j >= 0) {
                 Date endKey = key.getBooking().getEnd();
-                Date endJ = a[j].getBooking().getEnd();
-                if(endKey.compareTo(endJ) < 0){
-                    a[j+1] = a[j];
+                Date endJ   = a[j].getBooking().getEnd();
+                if (endKey.compareTo(endJ) < 0) {
+                    a[j + 1] = a[j];
                     j--;
                 } else {
                     break;
                 }
             }
-            a[j+1] = key;
+            a[j + 1] = key;
         }
-        for(int i = 0; i < count; i++){
-            System.out.println(a[i]);
-        }
-    } //print the list ordered by the ending date
+
+        // 4) print
+        for (int i = 0; i < count; i++) System.out.println(a[i]);
+    }
+
 }

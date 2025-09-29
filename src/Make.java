@@ -1,8 +1,8 @@
 public enum Make {
-    FORD,
     CHEVY,
-    TOYOTA,
-    HONDA;
+    FORD,
+    HONDA,
+    TOYOTA;
 
 
     @Override
