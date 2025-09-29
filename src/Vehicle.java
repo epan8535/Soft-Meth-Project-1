@@ -33,6 +33,9 @@ public class Vehicle implements Comparable<Vehicle> {
         return this.mileage;
     }
 
+    public void setMileage(int mileage) {
+        this.mileage = mileage;
+    }
 
     //Override .equals() method to test if plates Strings match one another
     @Override

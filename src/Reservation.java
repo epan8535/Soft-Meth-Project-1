@@ -25,7 +25,7 @@ public class Reservation {
     } //resize the array
 
     public void add(Booking booking) {
-        bookings.grow();
+        grow();
         bookings[bookings.length-1] = booking;
     } //add to end of array
 
