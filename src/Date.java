@@ -137,4 +137,29 @@ public class Date implements Comparable<Date>{
 
     }
 
+    /*
+    Test Bed classes
+     */
+
+    public static void main(String[] args){
+
+        Date failCaseOne = new Date(2017,2,29);
+        System.out.println("testCaseOne: " + failCaseOne.isValid() + " (expected false)" );
+
+        Date failCaseTwo = new Date(2020,2,31);
+        System.out.println("failCaseTwo: " + failCaseTwo.isValid() + " (expected false)");
+
+        Date failCaseThree = new Date(0,13,32);
+        System.out.println("failCaseThree: " + failCaseThree.isValid() + " (expected false)");
+
+        Date failCaseFour = new Date(1,1,1);
+        System.out.println("failCaseFour: " + failCaseFour.isValid() + " (expected false)");
+
+        Date succeedCaseOne = new Date(2020,2,29);
+        System.out.println("succeedCaseOne: " + succeedCaseOne.isValid() + " (expected true)");
+
+        Date succeedCaseTwo = new Date(2025,1,31);
+        System.out.println("succeedCaseTwo: " + succeedCaseTwo.isValid() + " (expected true)");
+    }
+
 }
