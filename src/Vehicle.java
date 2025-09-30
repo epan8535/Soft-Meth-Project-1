@@ -3,7 +3,7 @@
  * a plate number, an object obtained of the Date class, a make of the Make class, and an int mileage
  * Vehicles can be compared by Make and then by Date.
  *
- * @author Jake Cordon
+ * @author Jake Cordon and Everett Pan
  */
 
 public class Vehicle implements Comparable<Vehicle> {

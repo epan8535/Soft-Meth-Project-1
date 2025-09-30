@@ -1,7 +1,7 @@
 /*
 * Department enum class that lists all the Departments of the employees
 *
-* @author Jake Cordon
+* @author Jake Cordon and Everett Pan
  */
 
 public enum Department {

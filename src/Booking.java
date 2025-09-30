@@ -4,7 +4,7 @@
  *
  *  toString() prints out the Booking Beginning, End date, Vehicle being used, and Employee that inputted
  *
- * @author Jake Cordon
+ * @author Jake Cordon and Everett Pan
  */
 
 public class Booking {

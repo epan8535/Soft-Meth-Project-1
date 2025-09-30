@@ -4,7 +4,7 @@
  *
  *  isValid() tests whether the date inputted is a valid Calendar date
  *
- * @author Jake Cordon
+ * @author Jake Cordon and Everett Pan
  */
 
 public class Date implements Comparable<Date>{

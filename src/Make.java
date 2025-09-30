@@ -1,7 +1,7 @@
 /*
  * Make enum class that lists all the makes of the vehicles
  *
- * @author Jake Cordon
+ * @author Jake Cordon and Everett Pan
  */
 
 

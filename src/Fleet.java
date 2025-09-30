@@ -4,7 +4,7 @@
  * Vehicles can be added, removed, checked for existence, and printed
  * in sorted order (by make, then by date obtained).
  *
- * @author Your Name
+ * @author Jake Cordon and Everett Pan
  */
 public class Fleet {
 
