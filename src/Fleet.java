@@ -1,127 +1,149 @@
+/**
+ * Fleet class manages a resizable collection of vehicles.
+ * The fleet is stored in an array and grows by 4 when capacity is reached.
+ * Vehicles can be added, removed, checked for existence, and printed
+ * in sorted order (by make, then by date obtained).
+ *
+ * @author Your Name
+ */
 public class Fleet {
-    private static final int CAPACITY = 4; //initial capacity
-    private static final int NOT_FOUND = -1;
-    private Vehicle[] fleet; // fleet is stored as an array of vehicles
-    private int size; //current number of vehicles in the fleet
 
-    //constructor with initial size
-    public Fleet(){
+    // ================== Constants ==================
+    private static final int CAPACITY = 4;   // initial capacity
+    private static final int NOT_FOUND = -1; // sentinel for not found
+
+    // ================== Instance Variables ==================
+    private Vehicle[] fleet; // array of vehicles
+    private int size;        // current number of vehicles in the fleet
+
+    // ================== Constructors ==================
+
+    /**
+     * Creates an empty fleet with the default initial capacity.
+     */
+    public Fleet() {
         fleet = new Vehicle[CAPACITY];
         size = 0;
     }
 
+    // ================== Private Helper Methods ==================
 
-
-    private int find(Vehicle vehicle){      //returns the index at which the vehicle is found
-        for(int i = 0;i<size;i++){
-            if(vehicle.equals(fleet[i])){
+    /**
+     * Finds the index of a vehicle in the fleet.
+     *
+     * @param vehicle the vehicle to search for
+     * @return index of the vehicle, or NOT_FOUND if not present
+     */
+    private int find(Vehicle vehicle) {
+        for (int i = 0; i < size; i++) {
+            if (vehicle.equals(fleet[i])) {
                 return i;
             }
         }
-
         return NOT_FOUND;
     }
 
-    private void grow(){ // resizes the array
+    /**
+     * Increases the capacity of the fleet by 4.
+     */
+    private void grow() {
+        int newArrayLength = fleet.length + 4;
+        Vehicle[] newFleet = new Vehicle[newArrayLength];
 
-            int newArrayLength = fleet.length + 4; // fleet capacity grows by 4, add 4 to the current capacity
+        for (int i = 0; i < fleet.length; i++) {
+            newFleet[i] = fleet[i];
+        }
 
-            Vehicle[] newFleet = new Vehicle[newArrayLength];   // create new array
-
-            for(int i = 0; i<fleet.length; i++){   // point the old fleet to the new larger fleet
-                newFleet[i] = fleet[i];
-            }
-
-            fleet = newFleet;
-
+        fleet = newFleet;
     }
 
-    public void add(Vehicle vehicle){         // adds vehicle to the end of the array;
-
-        if(size == fleet.length){         // check if max capacity has been reached
-            grow();                       // call grow if true
-        }
-
-        fleet[size] = vehicle;              // add vehicle to the last free slot
-
-        size++;                          // increment size
-
-    }
-
-    public void remove(Vehicle vehicle){ // overwrite the last element
-
-        int index = find(vehicle); // find the index of the vehicle
-
-        if(index== NOT_FOUND){     // test if the vehicle cannot be found
-            return;                // return if vehicle is not in fleet
-        }
-
-        fleet[index] = fleet[size-1]; // replace the found vehicle with the last vehicle in the fleet
-
-        fleet[size-1] = null;   //remove the last vehicle from fleet
-
-        size--;       //decrease the size to account for the change
-
-    }
-
-    public boolean contains(Vehicle vehicle){
-        int index = find(vehicle);
-
-        if(index == NOT_FOUND){
-            return false;
-        }
-        return true;
-    }
-
-    public void printByMake(){ //ordered by make, then date obtained
-
-        if(size == 0){
-            System.out.println("There is no vehicle in the fleet.");
-            return;
-        }
-
-        for(int i = 0; i<size-1;i++){
-            int minimumIndex = i;
-
-            for(int j = i+1; j<size; j++){
-                if(compareByMakeThenDate(fleet[j],fleet[minimumIndex]) <0){
-                    minimumIndex = j;
-                }
-            }
-
-            if(minimumIndex != i){
-                Vehicle temp  = fleet[i];
-                fleet[i] = fleet[minimumIndex];
-                fleet[minimumIndex] = temp;
-            }
-
-
-
-        }
-
-        System.out.println("*List of vehicles in the fleet, ordered by make and date obtained.");
-        for(int i = 0; i<size;i++){
-            System.out.println(fleet[i].toString());
-        }
-        System.out.println("*end of list.");
-        System.out.println();
-
-    }
-
-    private int compareByMakeThenDate(Vehicle first, Vehicle second){
+    /**
+     * Compares two vehicles by make, then by obtained date.
+     *
+     * @param first  the first vehicle
+     * @param second the second vehicle
+     * @return negative if first < second, 0 if equal, positive if greater
+     */
+    private int compareByMakeThenDate(Vehicle first, Vehicle second) {
         int makeComparison = first.getMake().compareTo(second.getMake());
-
-        if(makeComparison!=0){
+        if (makeComparison != 0) {
             return makeComparison;
         }
         return first.getDate().compareTo(second.getDate());
     }
 
+    // ================== Public Methods ==================
 
+    /**
+     * Adds a vehicle to the fleet.
+     * If the array is full, the capacity is increased by 4.
+     *
+     * @param vehicle the vehicle to add
+     */
+    public void add(Vehicle vehicle) {
+        if (size == fleet.length) {
+            grow();
+        }
+        fleet[size] = vehicle;
+        size++;
+    }
 
+    /**
+     * Removes a vehicle from the fleet.
+     * The removed slot is replaced with the last vehicle in the array.
+     *
+     * @param vehicle the vehicle to remove
+     */
+    public void remove(Vehicle vehicle) {
+        int index = find(vehicle);
+        if (index == NOT_FOUND) {
+            return;
+        }
 
+        fleet[index] = fleet[size - 1];
+        fleet[size - 1] = null;
+        size--;
+    }
 
+    /**
+     * Checks if the fleet contains the given vehicle.
+     *
+     * @param vehicle the vehicle to check
+     * @return true if found, false otherwise
+     */
+    public boolean contains(Vehicle vehicle) {
+        return find(vehicle) != NOT_FOUND;
+    }
 
+    /**
+     * Prints the list of vehicles ordered by make, then by date obtained.
+     */
+    public void printByMake() {
+        if (size == 0) {
+            System.out.println("There is no vehicle in the fleet.");
+            return;
+        }
 
+        // Selection sort (in-place)
+        for (int i = 0; i < size - 1; i++) {
+            int minimumIndex = i;
+            for (int j = i + 1; j < size; j++) {
+                if (compareByMakeThenDate(fleet[j], fleet[minimumIndex]) < 0) {
+                    minimumIndex = j;
+                }
+            }
+            if (minimumIndex != i) {
+                Vehicle temp = fleet[i];
+                fleet[i] = fleet[minimumIndex];
+                fleet[minimumIndex] = temp;
+            }
+        }
 
+        System.out.println("*List of vehicles in the fleet, ordered by make and date obtained.");
+        for (int i = 0; i < size; i++) {
+            System.out.println(fleet[i].toString());
+        }
+        System.out.println("*end of list.");
+        System.out.println();
+    }
 }

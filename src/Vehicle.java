@@ -1,10 +1,31 @@
+/**
+ * Vehicle class represents the vehicle object within the Fleet class with
+ * a plate number, an object obtained of the Date class, a make of the Make class, and an int mileage
+ * Vehicles can be compared by Make and then by Date.
+ *
+ * @author Jake Cordon
+ */
+
 public class Vehicle implements Comparable<Vehicle> {
+
+    // ===================== Instance Variables ===================
+
     private String plate;
     private Date obtained;
     private Make make;
     private int mileage;
 
-    //constructor for Vehicle
+    // ===================== Constructors ===================
+
+    /**
+     * Creates a vehicle with a given plate, obtained date, make, and mileage
+     *
+     * @param plate     the license plate of the vehicle
+     * @param obtained  the date the vehicle was obtained
+     * @param make      the make of the vehicle
+     * @param mileage   the current mileage of the vehicle
+     */
+
     public Vehicle(String plate, Date obtained, Make make, int mileage){
 
         this.plate = plate;
@@ -14,7 +35,7 @@ public class Vehicle implements Comparable<Vehicle> {
 
     }
 
-    // getter methods
+    // ===================== Getter and Setter Methods ===================
     public String getPlate(){
 
         return this.plate;
@@ -37,9 +58,19 @@ public class Vehicle implements Comparable<Vehicle> {
         this.mileage = mileage;
     }
 
-    //Override .equals() method to test if plates Strings match one another
+    // ===================== Public Methods ===================
+
+    /*
+    * This method checks if two vehicles' license plates are the same
+    *
+    *
+    * @param Object obj     Object that gets cast to a Vehicle. This vehicle is then compared.
+    * @returns true if plate strings are equal and false if they are not
+     */
+
     @Override
     public boolean equals(Object obj){
+
         if(this == obj) return true;
         if(obj == null || getClass() != obj.getClass()) return false;
 
@@ -50,18 +81,35 @@ public class Vehicle implements Comparable<Vehicle> {
     }
 
 
-    //Override toString to print out in a specific format
+    /*
+    * This method overrides the default toString() to print out the plate,make,date obtained, and mileage
+    *
+     */
+
     @Override
     public String toString(){
-        return (plate +":"+ make +":"+ obtained + " [mileage:" + mileage+ "]" );
+
+        return (plate + ":" + make + ":" + obtained + " [mileage:" + mileage + "]" );
+
     }
+
+    /*
+    * This method compares vehicle objects first by make and then by Date
+    *
+    * @param vehicleBeingCompared the vehicle object that is being compared to the first object
+    * @return returns -1 if the second object is lexicographically earlier or mileage is greater than first object
+    *         returns 0 if date and mileage are equal
+    *         returns 1 if the second object is lexicographically later or mileage is less than the first object
+     */
 
     @Override
     public int compareTo(Vehicle vehicleBeingCompared) {
+
         int makeComparison = this.make.name().compareTo(vehicleBeingCompared.make.name());
         if (makeComparison < 0) {
             return -1;
         }
+
         if (makeComparison > 0) {
             return 1;
         }
@@ -78,6 +126,13 @@ public class Vehicle implements Comparable<Vehicle> {
         // Otherwise, they are equal
         return 0;
     }
+
+    // ===================== TestBed Main ===================
+
+    /*
+    * Unit Test for the compareTo() method
+    *
+     */
 
     public static void main(String[] args){
 
